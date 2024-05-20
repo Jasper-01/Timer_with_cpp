@@ -3,6 +3,8 @@ package com.example.timerwcpp;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -11,6 +13,8 @@ import com.example.timerwcpp.databinding.ActivityMainBinding;
 public class MainActivity extends AppCompatActivity {
 
     private Boolean timerIsRunning;
+    private Handler timerHandler;
+    private Runnable timerRunnable;
 
     // Used to load the 'timerwcpp' library on application startup.
     static {
@@ -34,25 +38,58 @@ public class MainActivity extends AppCompatActivity {
         timerDisplay.setText(R.string.reset_timer_display);
         timerIsRunning = false;
 
+        // Timer handler and runnable to update the UI
+        timerHandler = new Handler(Looper.getMainLooper());
+        timerRunnable = new Runnable() {
+            @Override
+            public void run() {
+                timerDisplay.setText(getElapsedTime());
+                if (timerIsRunning) {
+                    timerHandler.postDelayed(this, 1000);
+                }
+            }
+        };
+
         // Button click listeners
         playPauseBtn.setOnClickListener(view -> {
-            if(timerIsRunning){     // timerIsRunning == true
+            if (timerIsRunning) {
                 playPauseBtn.setImageResource(R.drawable.ic_baseline_play_icon);
-                timerIsRunning = false;
-            } else {    // timerIsRunning == false
+                stopTimer();
+            } else {
                 playPauseBtn.setImageResource(R.drawable.ic_baseline_pause_icon);
-                timerIsRunning = true;
+                startTimer();
+                timerHandler.post(timerRunnable);
             }
+            timerIsRunning = !timerIsRunning;
         });
 
         prevBtn.setOnClickListener(view -> {
-
+            resetTimer();
+            timerDisplay.setText(R.string.reset_timer_display);
+            if (timerIsRunning) {
+                playPauseBtn.setImageResource(R.drawable.ic_baseline_play_icon);
+                timerHandler.removeCallbacks(timerRunnable);
+                timerIsRunning = false;
+            }
         });
 
         nextBtn.setOnClickListener(view -> {
-
+            resetTimer();
+            timerDisplay.setText(R.string.reset_timer_display);
+            if (timerIsRunning) {
+                playPauseBtn.setImageResource(R.drawable.ic_baseline_play_icon);
+                timerHandler.removeCallbacks(timerRunnable);
+                timerIsRunning = false;
+            }
         });
     }
 
-//    public native String stringFromJNI();
+    private void initializeTimer(){
+
+    }
+
+    public native void startTimer();
+    public native void stopTimer();
+    public native void resetTimer();
+    public native String getElapsedTime();
 }
