@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">TimerWcpp</string>
+    <string name="reset_timer_display">00:00</string>
+</resources>
